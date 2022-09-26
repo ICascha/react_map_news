@@ -58,11 +58,14 @@ const MapComponent = ({ center, zoom }: ControlProps) => {
     },
   ];
 
+  const [map, setMap] = React.useState(null);
+
   return (
     <MapContainer
       center={somaliaPos}
       zoom={5.2}
       style={{ width: "100%", height: "100% " }}
+      whenCreated={setMap}
     >
       <ChangeView center={center} zoom={zoom} />
       <TileLayer
