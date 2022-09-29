@@ -3,6 +3,7 @@ type ControlProps2 = {
   zoom: number;
   drawIPC: boolean;
   drawMap: boolean;
+  setSelectedRegion: (string) => void;
 };
 
 type ControlProps = {

@@ -34,8 +34,8 @@ const DashBoard = () => {
   };
 
   const [drawIPC, setDrawIPC] = React.useState(false);
-  const [drawMap, setDrawMap] = React.useState(false);
-
+  const [drawMap, setDrawMap] = React.useState(true);
+  const [selectedRegion, setSelectedRegion] = React.useState("");
   return (
     <>
       <Header
@@ -60,12 +60,13 @@ const DashBoard = () => {
               <GranularitySlider setN={setN} />
               <div style={{ height: "70%" }}>
                 {startDate && <TestBar N={N} />}
-              </div>
-              <Checkbox onChange={(e) => setDrawMap(e.target.checked)}>show Map</Checkbox>
+              <Checkbox onChange={(e) => setDrawMap(e.target.checked)} defaultChecked={true}>show Map</Checkbox>
               <Checkbox onChange={(e) => setDrawIPC(e.target.checked)}>show IPC</Checkbox>
+              <h1>{selectedRegion}</h1>
+              </div>
             </Col>
             <Col span={12}>
-              <MapComponent center={mapCenter} zoom={mapZoom} drawIPC={drawIPC} drawMap={drawMap}/>
+              <MapComponent center={mapCenter} zoom={mapZoom} drawIPC={drawIPC} drawMap={drawMap} setSelectedRegion={setSelectedRegion}/>
             </Col>
           </Row>
         </div>

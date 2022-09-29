@@ -7,7 +7,7 @@ import Polygons from "./Polygons";
 
 const somaliaPos: LatLngTuple = [5.152149, 46.199615];
 
-const MapComponent = ({ center, zoom, drawIPC, drawMap }: ControlProps2) => {
+const MapComponent = ({ center, zoom, drawIPC, drawMap, setSelectedRegion }: ControlProps2) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const showModal = () => {
@@ -66,7 +66,7 @@ const MapComponent = ({ center, zoom, drawIPC, drawMap }: ControlProps2) => {
       zoomControl={false}
       style={{ width: "100%", height: "100% " }}
     >
-      {drawIPC && <Polygons/>}
+      {drawIPC && <Polygons setSelectedRegion={setSelectedRegion}/>}
       <ChangeView center={center} zoom={zoom} />
       {drawMap && <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

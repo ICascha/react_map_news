@@ -8,12 +8,34 @@ import React from "react";
 console.log(regionsJson);
 regionsJson.features.map((d) => console.log(d));
 const colors = ["#CDFACD", "#FAE61E", "#E67800", "#C80000", "#640000"];
-const randomColor = () => colors[Math.floor(Math.random() * 5)];
-function Polygons() {
-  
+const randomColor = (x: number) => colors[Math.floor(x*5/18)];
+type Props = {
+  setSelectedRegion: (arg0: string) => void;
+}
+function Polygons({setSelectedRegion} : Props) {
+
   const [showPopup, setShowPopup] = React.useState(false);
   const [popupPos, setPopupPos] = React.useState<LatLngTuple>([0, 0]);
   const [regionFocus, setRegionFocus] = React.useState(-1);
+  const region_names = ['Awdal',
+  'Bakool',
+  'Banadir',
+  'Bari',
+  'Bay',
+  'Galgaduud',
+  'Gedo',
+  'Hiraan',
+  'Middle Juba',
+  'Lower Juba',
+  'Mudug',
+  'Nugaal',
+  'Sanaag',
+  'Middle Shabelle',
+  'Lower Shabelle',
+  'Sool',
+  'Togdheer',
+  'Woqooyi Galbeed']
+
   return (
     <>
       {regionsJson.features.map((entry, index) => (
@@ -21,7 +43,7 @@ function Polygons() {
           data={entry as any}
           key={entry.id}
           pathOptions={{
-            fillColor: randomColor(),
+            fillColor: randomColor(Number(entry.id)),
             color: " black",
             weight: 1,
             fillOpacity: (regionFocus === -1) ? 1 : 0.35 + 0.65 * Number(regionFocus === index),
@@ -29,6 +51,7 @@ function Polygons() {
           eventHandlers={{
             click: (e) => {
               (regionFocus === index) ? setRegionFocus(-1): setRegionFocus(index);
+              setSelectedRegion(region_names[Number(entry.id)]);
             },
           }}
         />
