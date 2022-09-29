@@ -1,4 +1,13 @@
 @import '~antd/dist/antd.css';
+@import '~leaflet-draw/dist/leaflet.draw.css';
+
+.leaflet-draw-tooltip {
+  display: none;
+}
+
+.sr-only {
+  display: none;
+}
 
 .App {
   text-align: center;
