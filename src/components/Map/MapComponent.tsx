@@ -3,10 +3,11 @@ import { LatLngTuple } from "leaflet";
 import React from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import ChangeView from "./ChangeView";
+import Polygons from "./Polygons";
 
 const somaliaPos: LatLngTuple = [5.152149, 46.199615];
 
-const MapComponent = ({ center, zoom }: ControlProps) => {
+const MapComponent = ({ center, zoom, drawIPC, drawMap }: ControlProps2) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const showModal = () => {
@@ -58,20 +59,19 @@ const MapComponent = ({ center, zoom }: ControlProps) => {
     },
   ];
 
-  const [map, setMap] = React.useState(null);
-
   return (
     <MapContainer
       center={somaliaPos}
       zoom={5.2}
+      zoomControl={false}
       style={{ width: "100%", height: "100% " }}
-      whenCreated={setMap}
     >
+      {drawIPC && <Polygons/>}
       <ChangeView center={center} zoom={zoom} />
-      <TileLayer
+      {drawMap && <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      />}
       <Marker
         position={somaliaPos}
         eventHandlers={{
