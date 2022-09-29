@@ -38,11 +38,11 @@ const DashBoard = () => {
   const [selectedRegion, setSelectedRegion] = React.useState("");
   return (
     <>
-      <Header
+      {/* <Header
         className="site-layout-sub-header-background"
         style={{ padding: 0, height: "10%" }}
-      />
-      <Content style={{ margin: "24px 16px 0", height: "80%" }}>
+      /> */}
+      <Content style={{ margin: "16px", height: "100%" }}>
         <div
           className="site-layout-background"
           style={{ padding: 24, height: "100%", width: "100%" }}
