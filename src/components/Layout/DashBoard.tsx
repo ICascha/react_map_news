@@ -1,4 +1,4 @@
-import { Col, Layout, Menu, Row, DatePicker } from "antd";
+import { Col, Layout, Menu, Row, DatePicker, Checkbox } from "antd";
 import MapComponent from "../Map/MapComponent";
 import CountrySelection from "../Controls/CountrySelection";
 import GranularitySlider from "../Controls/GranularitySlider";
@@ -32,13 +32,17 @@ const DashBoard = () => {
     setStartDate(startDate);
     setEndDate(endDate);
   };
+
+  const [drawIPC, setDrawIPC] = React.useState(false);
+  const [drawMap, setDrawMap] = React.useState(true);
+  const [selectedRegion, setSelectedRegion] = React.useState("");
   return (
     <>
-      <Header
+      {/* <Header
         className="site-layout-sub-header-background"
         style={{ padding: 0, height: "10%" }}
-      />
-      <Content style={{ margin: "24px 16px 0", height: "80%" }}>
+      /> */}
+      <Content style={{ margin: "16px", height: "100%" }}>
         <div
           className="site-layout-background"
           style={{ padding: 24, height: "100%", width: "100%" }}
@@ -56,10 +60,13 @@ const DashBoard = () => {
               <GranularitySlider setN={setN} />
               <div style={{ height: "70%" }}>
                 {startDate && <TestBar N={N} />}
+              <Checkbox onChange={(e) => setDrawMap(e.target.checked)} defaultChecked={true}>show Map</Checkbox>
+              <Checkbox onChange={(e) => setDrawIPC(e.target.checked)}>show IPC</Checkbox>
+              <h1>{selectedRegion}</h1>
               </div>
             </Col>
             <Col span={12}>
-              <MapComponent center={mapCenter} zoom={mapZoom} />
+              <MapComponent center={mapCenter} zoom={mapZoom} drawIPC={drawIPC} drawMap={drawMap} setSelectedRegion={setSelectedRegion}/>
             </Col>
           </Row>
         </div>

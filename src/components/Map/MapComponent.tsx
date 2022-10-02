@@ -1,29 +1,13 @@
 import { Avatar, Carousel, Divider, Drawer, List, Modal } from "antd";
 import { LatLngTuple } from "leaflet";
 import React from "react";
-import {
-  MapContainer,
-  Marker,
-  Popup,
-  TileLayer,
-  FeatureGroup,
-} from "react-leaflet";
+import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import ChangeView from "./ChangeView";
-import HeatLayer from "./HeatLayer";
-import DrawingControl from "./DrawingControl";
-import L from "leaflet";
-import testIcon from "./test.svg";
-
-const iconPerson = new L.Icon({
-  iconUrl: testIcon, //require("./test.svg").default,
-  iconRetinaUrl: testIcon, //require("./test.svg").default,
-  iconSize: new L.Point(20, 20),
-  // className: "leaflet-div-icon",
-});
+import Polygons from "./Polygons";
 
 const somaliaPos: LatLngTuple = [5.152149, 46.199615];
 
-const MapComponent = ({ center, zoom }: ControlProps) => {
+const MapComponent = ({ center, zoom, drawIPC, drawMap, setSelectedRegion }: ControlProps2) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const showModal = () => {
@@ -79,20 +63,20 @@ const MapComponent = ({ center, zoom }: ControlProps) => {
     <MapContainer
       center={somaliaPos}
       zoom={5.2}
+      zoomControl={false}
       style={{ width: "100%", height: "100% " }}
     >
+      {drawIPC && <Polygons setSelectedRegion={setSelectedRegion}/>}
       <ChangeView center={center} zoom={zoom} />
-      <HeatLayer />
-      <TileLayer
+      {drawMap && <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      />}
       <Marker
         position={somaliaPos}
         eventHandlers={{
           click: (i) => showDrawer(),
         }}
-        icon={iconPerson}
       ></Marker>
       {/* <Modal
         title="Basic Modal"
@@ -141,7 +125,6 @@ const MapComponent = ({ center, zoom }: ControlProps) => {
         />
       </Drawer>
       {/* </Modal> */}
-      <DrawingControl />
     </MapContainer>
   );
 };
