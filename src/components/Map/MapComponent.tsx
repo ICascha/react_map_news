@@ -3,11 +3,17 @@ import { LatLngTuple } from "leaflet";
 import React from "react";
 import { MapContainer, Marker, Popup, TileLayer } from "react-leaflet";
 import ChangeView from "./ChangeView";
-import Polygons from "./Polygons";
+import DrawIPC from "./DrawIPC";
 
 const somaliaPos: LatLngTuple = [5.152149, 46.199615];
 
-const MapComponent = ({ center, zoom, drawIPC, drawMap, setSelectedRegion }: ControlProps2) => {
+const MapComponent = ({
+  center,
+  zoom,
+  drawIPC,
+  drawMap,
+  setSelectedRegion,
+}: ControlProps2) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
   const showModal = () => {
@@ -66,12 +72,20 @@ const MapComponent = ({ center, zoom, drawIPC, drawMap, setSelectedRegion }: Con
       zoomControl={false}
       style={{ width: "100%", height: "100% " }}
     >
-      {drawIPC && <Polygons setSelectedRegion={setSelectedRegion}/>}
+      {drawIPC && (
+        <DrawIPC
+          minDate={"2010-01-01"}
+          maxDate={"2020-01-01"}
+          setSelectedRegion={setSelectedRegion}
+        />
+      )}
       <ChangeView center={center} zoom={zoom} />
-      {drawMap && <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />}
+      {drawMap && (
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+      )}
       <Marker
         position={somaliaPos}
         eventHandlers={{
