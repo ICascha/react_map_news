@@ -13,6 +13,8 @@ const MapComponent = ({
   drawIPC,
   drawMap,
   setSelectedRegion,
+  startDate,
+  endDate,
 }: ControlProps2) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 
@@ -74,8 +76,8 @@ const MapComponent = ({
     >
       {drawIPC && (
         <DrawIPC
-          minDate={"2010-01-01"}
-          maxDate={"2020-01-01"}
+          minDate={startDate}
+          maxDate={endDate}
           setSelectedRegion={setSelectedRegion}
         />
       )}

@@ -6,9 +6,7 @@ const Anomalies = () => {
       minDate: "2019-01-01",
       maxDate: "2020-01-01",
     },
-  }).then((response) => {
-    console.log(response);
-  });
+  }).then((response) => {});
 
   return <div>Not yet implemented.</div>;
 };

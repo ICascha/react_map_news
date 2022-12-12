@@ -6,8 +6,8 @@ import DrawRegions from "./DrawRegions";
 const colors = ["#CDFACD", "#FAE61E", "#E67800", "#C80000", "#640000"];
 type Props = {
   setSelectedRegion: (regionName: string) => void;
-  minDate: string;
-  maxDate: string;
+  minDate: Date | null;
+  maxDate: Date | null;
 };
 
 type meanIpcDataRow = {
@@ -17,19 +17,26 @@ type meanIpcDataRow = {
 
 type meanIpcData = meanIpcDataRow[];
 
+const dateTostring = (date: Date) => date.toISOString().split("T")[0];
+
 function DrawIPC({ setSelectedRegion, minDate, maxDate }: Props) {
   const [ipcData, setIpcData] = React.useState<meanIpcData>([]);
 
   React.useEffect(() => {
+    if (minDate === null || maxDate === null) {
+      setIpcData([]);
+      return;
+    }
+    console.log(minDate.toISOString());
     Axios.get("http://localhost:3001/api/get_ipc_mean", {
       params: {
-        minDate: minDate,
-        maxDate: maxDate,
+        minDate: dateTostring(minDate),
+        maxDate: dateTostring(maxDate),
       },
     }).then((response) => {
       setIpcData(response.data);
     });
-  }, []);
+  }, [minDate, maxDate]);
 
   return (
     <>

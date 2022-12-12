@@ -4,10 +4,11 @@ type ControlProps2 = {
   drawIPC: boolean;
   drawMap: boolean;
   setSelectedRegion: (string) => void;
+  startDate: Date | null;
+  endDate: Date | null;
 };
 
 type ControlProps = {
   center: LatLngTuple;
   zoom: number;
 };
-
