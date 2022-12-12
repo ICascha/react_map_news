@@ -14,8 +14,18 @@ type Props = {
   setSelectedRegion: (regionName: string) => void;
 };
 
+const nRegions = 18;
+const selectedRegions: boolean[] = new Array(nRegions).fill(false);
+
+function setElement(arr: boolean[], index: number, value: boolean) {
+  const newArr = [...arr];
+  newArr[index] = value;
+  return newArr;
+}
+
 function DrawRegions({ data, setSelectedRegion }: Props) {
-  const [regionFocus, setRegionFocus] = React.useState(-1);
+  const [regionFocus, setRegionFocus] =
+    React.useState<boolean[]>(selectedRegions);
 
   return (
     <>
@@ -27,16 +37,19 @@ function DrawRegions({ data, setSelectedRegion }: Props) {
             fillColor: entry.color,
             color: "black",
             weight: 1,
-            fillOpacity:
-              regionFocus === -1
-                ? 1
-                : 0.35 + 0.65 * Number(regionFocus === index),
+            fillOpacity: regionFocus.some((x) => x)
+              ? 0.35 + 0.65 * Number(regionFocus[index])
+              : 1,
           }}
           eventHandlers={{
             click: (e) => {
-              regionFocus === index
-                ? setRegionFocus(-1)
-                : setRegionFocus(index);
+              if (e.originalEvent.shiftKey) {
+                setRegionFocus(regionFocus.map((x) => false));
+                return;
+              }
+              regionFocus[index]
+                ? setRegionFocus(setElement(regionFocus, index, false))
+                : setRegionFocus(setElement(regionFocus, index, true));
               setSelectedRegion(entry.region);
             },
           }}
