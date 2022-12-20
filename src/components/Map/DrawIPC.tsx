@@ -5,7 +5,7 @@ import DrawRegions from "./DrawRegions";
 
 const colors = ["#CDFACD", "#FAE61E", "#E67800", "#C80000", "#640000"];
 type Props = {
-  setSelectedRegion: (regionName: string) => void;
+  setSelectedRegion: (regionList: string[]) => void;
   minDate: Date | null;
   maxDate: Date | null;
 };

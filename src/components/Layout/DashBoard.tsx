@@ -6,6 +6,10 @@ import TestBar from "../charts/TestBar";
 import React from "react";
 import { LatLngTuple } from "leaflet";
 import DateSelection from "./DateSelection";
+import Line from "../charts/Line";
+import MyResponsiveLine from "../charts/MyResponsiveLine";
+import Axios from "axios";
+import dataSet from "../DataTypes";
 
 const { Content } = Layout;
 
@@ -22,7 +26,31 @@ const DashBoard = () => {
 
   const [drawIPC, setDrawIPC] = React.useState(false);
   const [drawMap, setDrawMap] = React.useState(true);
-  const [selectedRegion, setSelectedRegion] = React.useState("");
+  const [selectedRegion, setSelectedRegion] = React.useState<string[]>([]);
+  const [data, setData] = React.useState<dataSet[]>([]);
+
+  const dateTostring = (date: Date) => date.toISOString().split("T")[0];
+
+  React.useEffect(() => {
+    if (startDate === null || endDate === null) {
+      setData([]);
+      return;
+    }
+    console.log(startDate.toISOString());
+    console.log(selectedRegion);
+    Axios.get("http://localhost:3001/api/get_mean_ipc_date_by_region", {
+      params: {
+        minDate: dateTostring(startDate),
+        maxDate: dateTostring(endDate),
+        regions: selectedRegion,
+      },
+    }).then((response) => {
+      setData([{ id: "IPC", data: response.data }]);
+      // console.log(data);
+      // console.log("hi1");
+    });
+  }, [startDate, endDate, selectedRegion]);
+
   return (
     <>
       <Content style={{ margin: "16px", height: "100%" }}>
@@ -39,7 +67,7 @@ const DashBoard = () => {
               />
               <GranularitySlider setN={setN} />
               <div style={{ height: "70%" }}>
-                {startDate && <TestBar N={N} />}
+                {data.length > 0 && <MyResponsiveLine N={N} data={data} />}
                 <Checkbox
                   onChange={(e) => setDrawMap(e.target.checked)}
                   defaultChecked={true}

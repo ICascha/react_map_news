@@ -11,7 +11,7 @@ type dataRow = {
 
 type Props = {
   data: dataRow[];
-  setSelectedRegion: (regionName: string) => void;
+  setSelectedRegion: (regionList: string[]) => void;
 };
 
 const nRegions = 18;
@@ -26,6 +26,15 @@ function setElement(arr: boolean[], index: number, value: boolean) {
 function DrawRegions({ data, setSelectedRegion }: Props) {
   const [regionFocus, setRegionFocus] =
     React.useState<boolean[]>(selectedRegions);
+
+  const regionNames = data.map((x) => x.region);
+
+  React.useEffect(() => {
+    const selectedRegions = regionFocus
+      .map((x, index) => (x ? regionNames[index] : ""))
+      .filter((x) => x !== "");
+    setSelectedRegion(selectedRegions);
+  }, [regionFocus]);
 
   return (
     <>
@@ -50,7 +59,6 @@ function DrawRegions({ data, setSelectedRegion }: Props) {
               regionFocus[index]
                 ? setRegionFocus(setElement(regionFocus, index, false))
                 : setRegionFocus(setElement(regionFocus, index, true));
-              setSelectedRegion(entry.region);
             },
           }}
         />

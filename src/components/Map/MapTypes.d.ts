@@ -3,7 +3,7 @@ type ControlProps2 = {
   zoom: number;
   drawIPC: boolean;
   drawMap: boolean;
-  setSelectedRegion: (string) => void;
+  setSelectedRegion: (regionList: string[]) => void;
   startDate: Date | null;
   endDate: Date | null;
 };
