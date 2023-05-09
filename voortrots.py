@@ -1,0 +1,198 @@
+# %%
+import h5py
+from scipy import sparse
+import numpy as np
+
+# %%
+path = "data/"
+filename = "Head-and-Neck_01.mat"
+
+# %%
+f = h5py.File(path + filename, "r")
+
+# %%
+def get_h5py_struct_array_value(f, structname, fieldname, idx):
+    ref = f[structname][fieldname][idx, 0]
+    val = f[ref][()]
+    return val
+
+
+x = f["solutionX"][0]
+x1 = f["solutionX_alt"][0]
+n = x.shape[0]
+
+
+# %%
+class Constraint:
+    def __init__(
+        self, name, type_of_constraint, weight, maximum, value, A, b, c, active
+    ):
+        self.name = name
+        self.type_of_constraint = type_of_constraint
+        self.weight = weight
+        self.maximum = maximum
+        self.value = value
+        self.A = A
+        self.b = b
+        self.c = c
+        self.active = active
+
+        if type_of_constraint == "Linear":
+            # number of rows of A
+            n_rows = A.shape[1]
+            if n_rows == 1:
+                self.type = "mean"
+                self.A = self.A.T
+            else:
+                if maximum:
+                    self.type = "maximum"
+                else:
+                    self.type = "minimum"
+
+    def __str__(self):
+        return f"Constraint, Name: {self.name}, Type: {self.type_of_constraint}, Weight: {self.weight:.3f}, Maximum: {self.maximum}, Value: {self.value:.3f}"
+
+
+class Objective:
+    def __init__(
+        self, name, cost_function_type, weight, minimise, objective, A, b, c, active
+    ):
+        self.name = name
+        self.cost_function_type = cost_function_type
+        self.weight = weight
+        self.minimise = minimise
+        self.objective = objective
+        self.A = A
+        self.b = b
+        self.c = c
+        self.active = active
+
+        if cost_function_type == "Linear":
+            # number of rows of A
+            n_rows = A.shape[1]
+            if n_rows == 1:
+                self.type = "mean"
+                self.A = self.A.T
+            else:
+                if minimise:
+                    self.type = "maximum"
+                else:
+                    self.type = "minimum"
+
+    def __str__(self):
+        return f"Objective, Name: {self.name}, Type: {self.cost_function_type}, Weight: {self.weight:.3f}, Minimise: {self.minimise}, Value: {self.objective:.3f}"
+
+
+def get_data(f, idx):
+    is_constraint = bool(
+        get_h5py_struct_array_value(f, "problem", "IsConstraint", idx).item()
+    )
+    cost_function_type = int(
+        get_h5py_struct_array_value(f, "problem", "Type", idx).item()
+    )
+    type_dict = {1: "Linear", 2: "Quadratic", 3: "EUD", 4: "LTCP", 5: "DVH", 6: "Chain"}
+    cost_function_type = type_dict[cost_function_type]
+    weight = get_h5py_struct_array_value(f, "problem", "Weight", idx).item()
+    name = get_h5py_struct_array_value(f, "problem", "Name", idx)
+    name = "".join([chr(x) for x in name.squeeze()])
+    # if true for constraint, then then is a maximum constraint, if true for objective,
+    # then it is a minimisation problem
+    minimise = bool(get_h5py_struct_array_value(f, "problem", "Minimise", idx).item())
+    active = bool(get_h5py_struct_array_value(f, "problem", "Active", idx).item())
+    objective = get_h5py_struct_array_value(f, "problem", "Objective", idx).item()
+    data_id = int(get_h5py_struct_array_value(f, "problem", "dataID", idx).item()) - 1
+    # Getting the A, b, and c arrays.
+    # A is sometimes stored as a sparse matrix, so we need to use the scipy.sparse.csc_matrix
+    ref = f["data"]["matrix"]["A"][data_id, 0]
+    val = f[ref]
+
+    if isinstance(val, h5py.Dataset):
+        A = np.array(val[()])
+    else:
+        if cost_function_type == "Quadratic":
+            A = sparse.csc_matrix((val["data"], val["ir"], val["jc"]), shape=(n, n))
+        else:
+            A = sparse.csc_matrix((val["data"], val["ir"], val["jc"]))
+    ref = f["data"]["matrix"]["b"][data_id, 0]
+    b = np.array(f[ref][()])
+    ref = f["data"]["matrix"]["c"][data_id, 0]
+    c = np.array(f[ref][()])
+
+    if is_constraint:
+        return Constraint(
+            name, cost_function_type, weight, minimise, objective, A, b, c, active
+        )
+    else:
+        return Objective(
+            name, cost_function_type, weight, minimise, objective, A, b, c, active
+        )
+
+
+# %%
+N_parts = f["problem"]["Name"].shape[0]
+parts = [get_data(f, idx) for idx in range(0, N_parts)]
+# filter out non-active parts
+parts = [p for p in parts if p.active]
+
+objectives = []
+constraints = []
+for part in parts:
+    if isinstance(part, Objective):
+        objectives.append(part)
+    else:
+        constraints.append(part)
+
+l = []
+
+for i, constraint in enumerate(constraints):
+    if constraint.type_of_constraint == "Linear":
+        asubi, asubj, avalij = sparse.find(constraint.A)
+        n_rows_a = asubi.max() + 1
+        if constraint.type == "mean":
+            print(f"Name={constraint.name}, cont_var={1}, bin_var={0}")
+            l.append([constraint.name, n_rows_a, 1, 0])
+        else:
+            print(
+                f"Name={constraint.name}, cont_var={n_rows_a + 1}, bin_var={n_rows_a}"
+            )
+            l.append([constraint.name, n_rows_a, n_rows_a + 1, n_rows_a])
+
+    if constraint.type_of_constraint == "Quadratic":
+        # small identity matrix
+        print(f"Name={constraint.name}, cont_var={0}, bin_var={0}")
+        l.append([constraint.name, 0, 0, 0])
+
+    if constraint.type_of_constraint == "LTCP":
+        n_rows_a = asubi.max() + 1
+        print(
+            f"Name={constraint.name}, cont_var={n_rows_a*2 + 1}, bin_var={2 * n_rows_a}"
+        )
+        l.append([constraint.name, n_rows_a, n_rows_a * 2 + 1, 2 * n_rows_a])
+
+for objective in objectives:
+    if objective.cost_function_type == "Linear":
+        asubi, asubj, avalij = sparse.find(objective.A)
+        n_rows_a = asubi.max() + 1
+        if objective.type == "mean":
+            print(f"Name={objective.name}, cont_var={1}, bin_var={0}")
+            l.append([objective.name, n_rows_a, 1, 0])
+
+        else:
+            print(f"Name={objective.name}, cont_var={n_rows_a + 1}, bin_var={n_rows_a}")
+            l.append([objective.name, n_rows_a, n_rows_a + 1, n_rows_a])
+
+    if objective.cost_function_type == "Quadratic":
+        # small identity matrix
+        print(f"Name={objective.name}, cont_var={0}, bin_var={0}")
+        l.append([objective.name, 0, 0, 0])
+
+    if objective.cost_function_type == "LTCP":
+        n_rows_a = asubi.max() + 1
+        print(
+            f"Name={objective.name}, cont_var={n_rows_a*2 + 1}, bin_var={2 * n_rows_a}"
+        )
+        l.append([objective.name, n_rows_a, n_rows_a * 2 + 1, 2 * n_rows_a])
+
+import pandas as pd
+
+df = pd.DataFrame(l, columns=["name", "m", "continuous", "binary"])
